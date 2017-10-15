@@ -30,7 +30,7 @@ When the chargepoint is connected, backend figures out what format the data is o
 ### Final
 To sum up the whole thing, I drew a diagram on what my thinking is while building this system.
 
-![alt text](https://github.com/nihitx/web-socket-openchargepointprotocol/blob/master/virta.png)
+![Picture](https://github.com/nihitx/web-socket-openchargepointprotocol/Virta.png)
 
 ### Author
 Masnad
