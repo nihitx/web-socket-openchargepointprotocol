@@ -4,26 +4,38 @@ var ws = new WebSocket("ws://localhost:3000", ["ocpp1.6", "ocpp1.5"]);
 ws.onopen = function(){
 	// Assumption of connection to charge point
 	console.log("Connected to charge point");
- /* Now lets pretend that the charge point is sending data to the server for the firs time
-  I am assuming that this is where the handshake section falls into with auth
- */
 }
 
 ws.onmessage = function(payload){
 	payload_data = JSON.parse(payload.data);
+	console.log(payload_data);
 	if(payload_data['auth'] == 'handshake'){
-		boot_notification = [2,
- 												"19223201",
- 												"BootNotification",
- 													{"chargePointVendor": "VendorX", "chargePointModel": "SingleSocketCharger"}
-												]
-	ws.send(JSON.stringify(boot_notification));
+
+		var messageTypeId = 2;
+		var UniqueId = 19223201;
+		var Action = "BootNotification";
+		var Payload = {"chargePointVendor": "VendorX", "chargePointModel": "SingleSocketCharger"}
+		boot_notification = [messageTypeId, UniqueId, Action,Payload]
+
+		ws.send(JSON.stringify(boot_notification));
 	}else{
-		console.log(payload_data);
+		x = 0;
+		if(!payload_data.Payload){
+			x = payload_data.heartbeatInterval;
+		}else{
+			x = payload_data.Payload.heartbeatInterval;
+		}
+		var timer = setInterval(function(){
+			ws.send(JSON.stringify({heart_beat : "heart_beat_cp"}),function (error){
+				if(error){
+					clearInterval(timer);
+					console.log('CS disconnected');
+				}
+			});
+		}, x);
 	}
 }
 
 ws.onclose = function(){
 	console.log("Disconnected");
-	ws.send('Disconnected');
 }

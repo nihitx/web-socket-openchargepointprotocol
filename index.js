@@ -44,15 +44,35 @@ ws.on('connection', function connection(ws, req) {
   }
   ws.on('message', function incoming(message) {
     return_data = JSON.parse(message);
-    /* Lets assume the return_data has been checked for whatever information it needs */
-      heart_beat =[ return_data[0],
-     								return_data[1],
-     								 {status:"Accepted", currentTime:"2013-02-01T20:53:32.486Z", "heartbeatInterval":300}
-                 ]
-     /* Not sure if I should ping it or just send it back as json
-        Since I am pinging it, not sure what pong should fire.
-      */
-      ws.ping(heart_beat);
-      ws.send(JSON.stringify(heart_beat));
+    var heartbeatInterval = 5000;
+    if(return_data[2] === 'BootNotification'){
+        var heart_beat ={   MessageTypeId : return_data[0],
+       								      UniqueId : return_data[1],
+       								      Payload : {status:"Accepted", currentTime:Date.now(), "heartbeatInterval":heartbeatInterval}
+                          }
+       try {
+         ws.send(JSON.stringify(heart_beat));
+       }
+       catch (e) {
+          console.log('Failed After Bootnotification');
+          return false;
+       }
+
+    }else{
+
+      var heart_beat = {status:"Accepted", currentTime:Date.now(), "heartbeatInterval":heartbeatInterval}
+      try {
+         ws.send(JSON.stringify(heart_beat));
+      }
+      catch (e) {
+         console.log('Failed to send heart beat reply');
+         return false;
+      }
+    }
   });
+});
+
+// This function doesnt seem to work with browser 
+ws.on('close', function close() {
+  console.log('disconnected');
 });
